@@ -10,10 +10,10 @@
 typedef std::vector<std::vector<double> > IMAGE_T;
 
 // Helper function to count connected components (holes)
-int countHoles(const IMAGE_T &img) {
+int countHoles(const std::vector<std::vector<double> > &img) {
     int h = img.size();
     int w = img[0].size();
-    std::vector<std::vector<bool>> visited(h, std::vector<bool>(w, false));
+    std::vector<std::vector<bool> > visited(h, std::vector<bool>(w, false));
     
     auto floodFill = [&](int y, int x, auto& ff_ref) -> void {
         if (y < 0 || y >= h || x < 0 || x >= w || visited[y][x]) return;
