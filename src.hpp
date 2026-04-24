@@ -7,7 +7,7 @@
 #include <numeric>
 #include <map>
 
-typedef std::vector<std::vector<double>> IMAGE_T;
+typedef std::vector<std::vector<double> > IMAGE_T;
 
 // Helper function to count connected components (holes)
 int countHoles(const IMAGE_T &img) {
