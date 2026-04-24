@@ -139,12 +139,11 @@ Features extractFeatures(const std::vector<std::vector<double> > &img) {
 int judge(std::vector<std::vector<double> > &img) {
     Features f = extractFeatures(img);
     
-    // Rule-based classification using extracted features
+    // More sophisticated rule-based classification
     
-    // 0: Has one hole, good vertical symmetry, balanced top/bottom
-    if (f.holes == 1 && f.vertical_symmetry > 0.7 && 
-        std::abs(f.top_density - f.bottom_density) < 0.15) {
-        return 0;
+    // 1: Very narrow, mostly vertical
+    if (f.aspect_ratio < 0.35) {
+        return 1;
     }
     
     // 8: Has two holes
@@ -152,56 +151,51 @@ int judge(std::vector<std::vector<double> > &img) {
         return 8;
     }
     
-    // 1: Very narrow, high aspect ratio difference, mostly in center
-    if (f.aspect_ratio < 0.4 && f.center_density > 0.5) {
-        return 1;
+    // 7: Top heavy, strong top, weak bottom
+    if (f.top_third_density > 0.55 && f.bottom_third_density < 0.4 && f.holes == 0) {
+        return 7;
+    }
+    
+    // 4: Gap in bottom left, right side strong
+    if (f.bottom_left_density < 0.35 && f.right_density > 0.5 && f.holes == 0) {
+        return 4;
+    }
+    
+    // 5: Top heavy, no holes, right side weaker than left in top half
+    if (f.holes == 0 && f.top_density > f.bottom_density + 0.08 && 
+        f.top_left_density > f.top_right_density && f.bottom_left_density < f.bottom_right_density) {
+        return 5;
     }
     
     // 6: Has one hole, bottom heavy
-    if (f.holes == 1 && f.bottom_density > f.top_density + 0.1) {
+    if (f.holes == 1 && f.bottom_density > f.top_density + 0.05) {
         return 6;
     }
     
     // 9: Has one hole, top heavy
-    if (f.holes == 1 && f.top_density > f.bottom_density + 0.1) {
+    if (f.holes == 1 && f.top_density > f.bottom_density + 0.05) {
         return 9;
     }
     
-    // 7: Top heavy, strong top third
-    if (f.top_third_density > 0.6 && f.top_third_density > f.bottom_third_density + 0.2) {
-        return 7;
+    // 0: Has one hole, balanced
+    if (f.holes == 1) {
+        return 0;
     }
     
-    // 4: Middle and top heavy, has a gap in bottom left
-    if (f.bottom_left_density < 0.3 && f.middle_third_density > 0.5 && 
-        f.right_density > f.left_density) {
-        return 4;
-    }
-    
-    // 2: Bottom heavy, curves
-    if (f.bottom_density > f.top_density + 0.05 && f.holes == 0 && 
-        f.bottom_left_density > 0.4) {
+    // 2: Bottom heavy, no holes, left side strong at bottom
+    if (f.holes == 0 && f.bottom_density > f.top_density + 0.05 && 
+        f.bottom_left_density > 0.45) {
         return 2;
     }
     
-    // 3: Right heavy, no holes, relatively symmetric vertically
-    if (f.holes == 0 && f.right_density > f.left_density + 0.1 && 
-        std::abs(f.top_density - f.bottom_density) < 0.2) {
+    // 3: No holes, relatively balanced but right-leaning
+    if (f.holes == 0 && f.right_density > f.left_density) {
         return 3;
     }
     
-    // 5: Top heavy, no holes, left-right asymmetric
-    if (f.holes == 0 && f.top_density > f.bottom_density && 
-        std::abs(f.left_density - f.right_density) > 0.1) {
-        return 5;
-    }
-    
-    // Default fallback based on density patterns
-    if (f.holes == 1) return 0;
-    if (f.holes >= 2) return 8;
-    if (f.top_density > f.bottom_density + 0.1) return 7;
-    if (f.bottom_density > f.top_density + 0.1) return 2;
-    if (f.aspect_ratio < 0.4) return 1;
+    // Remaining fallbacks
+    if (f.holes == 0 && f.top_density > f.bottom_density + 0.1) return 7;
+    if (f.holes == 0 && f.bottom_density > f.top_density + 0.1) return 2;
     
     // Final fallback
     return 3;
