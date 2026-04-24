@@ -7,8 +7,6 @@
 #include <numeric>
 #include <map>
 
-typedef std::vector<std::vector<double> > IMAGE_T;
-
 // Helper function to count connected components (holes)
 int countHoles(const std::vector<std::vector<double> > &img) {
     int h = img.size();
@@ -68,7 +66,7 @@ struct Features {
     double bottom_third_density;
 };
 
-Features extractFeatures(const IMAGE_T &img) {
+Features extractFeatures(const std::vector<std::vector<double> > &img) {
     Features f;
     int h = img.size();
     int w = img[0].size();
@@ -138,7 +136,7 @@ Features extractFeatures(const IMAGE_T &img) {
     return f;
 }
 
-int judge(IMAGE_T &img) {
+int judge(std::vector<std::vector<double> > &img) {
     Features f = extractFeatures(img);
     
     // Rule-based classification using extracted features
